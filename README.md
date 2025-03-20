@@ -208,6 +208,7 @@ sudo systemctl enable --now crond.service
 
 ### **4.2 Criação do Script de Monitoramento**
 Copie o script de monitoramento para `/usr/local/bin` e torne-o executável:
+monitoramento_v2.sh
 
 ```bash
 sudo cp ~/monitoramento.sh /usr/local/bin/
