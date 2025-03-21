@@ -68,6 +68,8 @@ Abra um navegador e acesse o endereço IP do servidor:
 ```plaintext
 http://Endereço_IP
 ```
+![image](https://github.com/user-attachments/assets/63e0fe62-9959-4d4c-94b0-f69aa7749797)
+
 
 Se o Nginx estiver funcionando corretamente, você verá a página de teste padrão.
 
