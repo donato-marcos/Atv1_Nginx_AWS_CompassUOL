@@ -1,141 +1,123 @@
 
+## ETAPA 1 – CONFIGURAÇÃO DO AMBIENTE
 
-# **Projeto: Configuração de Servidor Web com Nginx no Rocky Linux e Amazon Linux**
+### 1.1 Criar VPC e Sub-redes
 
-Este projeto consiste na configuração de um servidor web utilizando **Nginx** em sistemas **Rocky Linux** e **Amazon Linux**. O projeto aborda a instalação do Nginx, a configuração de múltiplos sites, a criação de scripts de monitoramento e a automação de tarefas com **Crontab**.
+1. Acesse o AWS Console > VPC.
+2. Crie uma VPC com o bloco CIDR `10.0.0.0/16`.
+3. Crie 2 sub-redes públicas e 2 sub-redes privadas.
+   ![image](https://github.com/user-attachments/assets/39490445-7552-47a6-b3b0-4dee37c44da9)
 
----
 
-## **Etapa 1: Configuração Inicial do Servidor**
+### 1.2 Configurar o Security Group
 
-### **1.1 Atualização do Sistema**
-Antes de começar, é importante atualizar o sistema e instalar ferramentas úteis:
+1. Em EC2, vá para o Security Groups e escolha o security group que está associado à VPC criada.
+2. Configure as regras de entrada (inbound) e saída (outbound) conforme necessário:
+   ![image](https://github.com/user-attachments/assets/f4748441-dccd-42d8-a632-a10be8085171)
+
+   ![image](https://github.com/user-attachments/assets/aadbcc20-285f-4e47-a866-d16d61b46f57)
+
+
+### 1.3 Criar Instância EC2
+
+1. No AWS Console, vá para EC2 > Launch Instance.
+2. Selecione uma AMI baseada em Linux (Amazon Linux 2023).
+3. Associe um par de chaves SSH (`chave01.pem`).
+4. Configure a instância para usar uma sub-rede pública da VPC criada.
+5. Escolha o security group previamente configurado.
+   ![image](https://github.com/user-attachments/assets/3b1ed7d4-09ad-483d-8522-c4dc19836c27)
+
+
+### 1.4 Acessar Instância
+
+Acesse a instância via SSH usando o comando:
+
+```bash
+ssh -i /local/da/chave/privada/chave01.pem ec2-user@ip_publico
+```
+
+## ETAPA 2 – CONFIGURAÇÃO DO SERVIDOR WEB
+
+### 2.1 Atualização e Instalação de Pacotes
+
+1. Atualize o sistema e instale pacotes necessários:
 
 ```bash
 sudo dnf clean all
 sudo dnf makecache
 sudo dnf upgrade -y
-sudo dnf install vim tmux -y
+sudo dnf install vim tmux nginx
 ```
 
-### **1.2 Configuração do Hostname e Fuso Horário**
-Defina o hostname e o fuso horário do servidor:
+2. Configure o hostname e o fuso horário:
 
 ```bash
 sudo hostnamectl set-hostname nginx01.aesthar.com.br
 sudo timedatectl set-timezone America/Sao_Paulo
 ```
 
-### **1.3 Configuração do Arquivo `/etc/hosts`**
-Adicione o hostname ao arquivo `/etc/hosts`:
-
+3. Edite o arquivo `/etc/hosts` para incluir o hostname, exemplo:
 ```bash
-sudo vim /etc/hosts
-```
-
-Adicione as seguintes linhas:
-
-```plaintext
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 192.168.122.164 nginx01.aesthar.com.br nginx01
 ```
 
----
-
-## **Etapa 2: Instalação e Configuração do Nginx**
-
-### **2.1 Instalação do Nginx**
-Instale o Nginx e habilite o serviço para iniciar automaticamente:
+4. Habilite e inicie o serviço Nginx:
 
 ```bash
-sudo dnf install nginx -y
 sudo systemctl enable --now nginx.service
 ```
 
-### **2.2 Configuração do Firewall (Apenas para Rocky Linux)**
-No Rocky Linux, libere as portas HTTP e HTTPS no firewall:
-
-```bash
-sudo firewall-cmd --permanent --add-service={http,https}
-sudo firewall-cmd --runtime-to-permanent
-sudo firewall-cmd --reload
-```
-
-### **2.3 Teste de Funcionamento do Nginx**
-Abra um navegador e acesse o endereço IP do servidor:
-
-```plaintext
-http://Endereço_IP
-```
-![image](https://github.com/user-attachments/assets/63e0fe62-9959-4d4c-94b0-f69aa7749797)
+5. Abra um navegador web na sua máquina e digite o endereço de ip público:
+   http://ip_publico
+   ![image](https://github.com/user-attachments/assets/3f65467c-e2b4-42d4-82e4-50fde939b6c4)
 
 
-Se o Nginx estiver funcionando corretamente, você verá a página de teste padrão.
+### 2.2 Configuração do Nginx
 
----
-
-## **Etapa 3: Configuração de Múltiplos Sites**
-
-### **3.1 Criação dos Diretórios dos Sites**
-Crie diretórios para dois sites diferentes:
+1. Crie diretórios para dois sites (`site1.com` e `site2.com`):
 
 ```bash
 sudo mkdir -p /var/www/site1.com/html
 sudo mkdir -p /var/www/site2.com/html
 ```
 
-### **3.2 Criação das Páginas HTML**
-Crie páginas HTML simples para cada site:
+2. Crie arquivos `index.html` para cada site:
 
-**Site 1:**
-
-```bash
-sudo vim /var/www/site1.com/html/index.html
-```
-
-Adicione o seguinte conteúdo:
-
+**/var/www/site1.com/html/index.html**
 ```html
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>SITE 1</title>
-        <link rel="stylesheet" href="style.css">
-    </head>
-    <body>
-        <h1>Bem Vindo ao Site 1</h1>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SITE 1</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Bem Vindo ao Site 1</h1>
+</body>
 </html>
 ```
 
-**Site 2:**
-
-```bash
-sudo vim /var/www/site2.com/html/index.html
-```
-
-Adicione o seguinte conteúdo:
-
+**/var/www/site2.com/html/index.html**
 ```html
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>SITE 2</title>
-        <link rel="stylesheet" href="style.css">
-    </head>
-    <body>
-        <h1>Bem Vindo ao Site 2</h1>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SITE 2</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Bem Vindo ao Site 2</h1>
+</body>
 </html>
 ```
 
-### **3.3 Ajuste de Permissões**
-Ajuste as permissões dos diretórios:
+3. Configure as permissões:
 
 ```bash
 chown -R $USER:$USER /var/www/site1.com/html
@@ -145,17 +127,9 @@ sudo restorecon -Rv /var/www/site1.com/html
 sudo restorecon -Rv /var/www/site2.com/html
 ```
 
-### **3.4 Configuração dos Arquivos de Configuração do Nginx**
-Crie arquivos de configuração para cada site:
+4. Crie arquivos de configuração do Nginx para cada site:
 
-**Site 1:**
-
-```bash
-sudo vim /etc/nginx/conf.d/site1.com.conf
-```
-
-Adicione o seguinte conteúdo:
-
+**/etc/nginx/conf.d/site1.com.conf**
 ```nginx
 server {
     listen 80;
@@ -168,14 +142,7 @@ server {
 }
 ```
 
-**Site 2:**
-
-```bash
-sudo vim /etc/nginx/conf.d/site2.com.conf
-```
-
-Adicione o seguinte conteúdo:
-
+**/etc/nginx/conf.d/site2.com.conf**
 ```nginx
 server {
     listen 80;
@@ -188,47 +155,73 @@ server {
 }
 ```
 
-### **3.5 Teste e Reinicialização do Nginx**
-Teste a configuração do Nginx e reinicie o serviço:
+5. Teste a configuração do Nginx e reinicie o serviço:
 
 ```bash
 sudo nginx -t
 sudo systemctl restart nginx.service
 ```
+   ![image](https://github.com/user-attachments/assets/3f004b3d-7ab6-4d36-a2fe-5ec1bad38b2e)
 
----
 
-## **Etapa 4: Automação com Shell Script e Crontab**
+6. Adicione entradas no arquivo `/etc/hosts` para mapear os domínios:
 
-### **4.1 Instalação do Cronie**
-Instale o **cronie** para agendar tarefas:
+```bash
+192.168.122.164 site1.aesthar.com.br
+192.168.122.164 site2.aesthar.com.br
+```
+
+7. Acesse os sites via navegador:
+   - `http://site1.aesthar.com.br`
+   - `http://site2.aesthar.com.br`
+   
+   ![image](https://github.com/user-attachments/assets/98a38796-917a-474a-b742-bd24b08488ce)
+
+   Ou caso possua um domínio, poderá fazer uma configuração semelhante abaixo:
+   ![image](https://github.com/user-attachments/assets/cf72c513-dbd3-4d74-a369-019ae280644f)
+
+
+## ETAPA 3 – SCRIPT DE MONITORAMENTO + WEBHOOK
+
+### 3.1 Criação de WebHook no Discord
+
+1. No servidor do Discord, clique com o botão direito em "Server Settings" > "Integrations".
+2. Crie um WebHook e copie a URL.
+   ![image](https://github.com/user-attachments/assets/82a91aea-490f-4073-8cbd-e5802234d5b3)
+
+3. Substitua a URL na variável do shell script:
+   ![image](https://github.com/user-attachments/assets/ace84317-f0df-4a9b-ab27-9164f3f9ec7d)
+
+
+### 3.2 Configuração do Script de Monitoramento
+
+1. Instale o `cronie` para agendamento de tarefas:
 
 ```bash
 sudo dnf install cronie -y
 sudo systemctl enable --now crond.service
 ```
 
-### **4.2 Criação do Script de Monitoramento**
-Copie o script de monitoramento para `/usr/local/bin` e torne-o executável:
-https://github.com/donato-marcos/Atv1_Nginx_AWS_CompassUOL/blob/main/monitoramento_v2.sh
+2. Copie o script de monitoramento para `/usr/local/bin` e torne-o executável:
 
 ```bash
-sudo cp ~/monitoramento.sh /usr/local/bin/
-sudo chmod +x /usr/local/bin/monitoramento.sh
+sudo scp -i /local/da/chave/privada/chave01.pem /local/do/shell_script.sh ec2-user@ip_publico:/home/ec2-user
+sudo cp ~/shell_script.sh /usr/local/bin/
+sudo chmod +x /usr/local/bin/shell_script.sh
 ```
 
-### **4.3 Configuração do Crontab**
-Edite o arquivo `/etc/crontab` para agendar a execução do script a cada minuto:
+3. Edite o arquivo `/etc/crontab` para executar o script periodicamente:
 
 ```bash
-sudo vim /etc/crontab
+* * * * * root export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin && /usr/local/bin/shell_script.sh >> /var/log/shell_script.log 2>&1
+```
+SE o export PATH já estiver sendo usado no shell script não será necessário no crontab:
+
+```bash
+* * * * * root /usr/local/bin/shell_script.sh >> /var/log/shell_script.log 2>&1
 ```
 
-Adicione a seguinte linha:
-
-```plaintext
-* * * * * root /usr/local/bin/monitoramento.sh >> /var/log/monitoramento.log 2>&1
-```
+4. O script verifica o status do serviço Nginx e envia notificações para o Discord via WebHook.
+   ![image](https://github.com/user-attachments/assets/a6d46328-4ac0-4b1b-a1dd-1d1729674263)
 
 ---
-
