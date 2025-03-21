@@ -204,6 +204,8 @@ sudo systemctl enable --now crond.service
 
 2. Copie o script de monitoramento para `/usr/local/bin` e torne-o executável:
 
+   https://github.com/donato-marcos/Atv1_Nginx_AWS_CompassUOL/blob/main/monitoramento_v2.sh
+
 ```bash
 sudo scp -i /local/da/chave/privada/chave01.pem /local/do/shell_script.sh ec2-user@ip_publico:/home/ec2-user
 sudo cp ~/shell_script.sh /usr/local/bin/
