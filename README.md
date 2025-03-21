@@ -12,7 +12,7 @@
 ### 1.2 Configurar o Security Group
 
 1. Em **EC2**, vá para o **Security Groups** e escolha o security group que está associado à VPC criada.
-2. Configure as regras de entrada (inbound) e saída (outbound) conforme necessário:
+2. Configure as regras de entrada (**inbound**) e saída (**outbound**) conforme necessário:
    ![image](https://github.com/user-attachments/assets/f4748441-dccd-42d8-a632-a10be8085171)
 
    ![image](https://github.com/user-attachments/assets/aadbcc20-285f-4e47-a866-d16d61b46f57)
@@ -20,8 +20,8 @@
 
 ### 1.3 Criar Instância EC2
 
-1. No AWS Console, vá para EC2 > Launch Instance.
-2. Selecione uma AMI baseada em Linux (Amazon Linux 2023).
+1. No AWS Console, vá para EC2 > **Launch Instance**.
+2. Selecione uma AMI baseada em Linux (**Amazon Linux 2023**).
 3. Associe um par de chaves SSH (`chave01.pem`).
 4. Configure a instância para usar uma sub-rede pública da VPC criada.
 5. Escolha o security group previamente configurado.
