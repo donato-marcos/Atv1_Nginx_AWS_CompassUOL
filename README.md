@@ -3,7 +3,7 @@
 
 ### 1.1 Criar VPC e Sub-redes
 
-1. Acesse o AWS Console > VPC.
+1. Acesse o **AWS Console** > **VPC**.
 2. Crie uma VPC com o bloco CIDR `10.0.0.0/16`.
 3. Crie 2 sub-redes públicas e 2 sub-redes privadas.
    ![image](https://github.com/user-attachments/assets/39490445-7552-47a6-b3b0-4dee37c44da9)
@@ -11,7 +11,7 @@
 
 ### 1.2 Configurar o Security Group
 
-1. Em EC2, vá para o Security Groups e escolha o security group que está associado à VPC criada.
+1. Em **EC2**, vá para o **Security Groups** e escolha o security group que está associado à VPC criada.
 2. Configure as regras de entrada (inbound) e saída (outbound) conforme necessário:
    ![image](https://github.com/user-attachments/assets/f4748441-dccd-42d8-a632-a10be8085171)
 
