@@ -3,23 +3,26 @@
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 #
 # ---------------------------------------------------- #
-# Nome do Script: monitoramento_v2.sh
+# Nome do Script: monitoramento.sh
 # Descrição: descrição do script
 # Site:
 # Escrito por: Marcos Donato
 # Manutenção: Marcos Donato
-# Licença:
+# Licença:  
 # ---------------------------------------------------- #
 # Uso:
-#       $ sudo ./monitoramento_v2.sh
+#       $ sudo ./monitoramento.sh
 # ---------------------------------------------------- #
 # Testado em:
 #       Bash "5.2.21"
 # ---------------------------------------------------- #
-# Histórico: v2.0 2025-03-19, Marcos:
-#             - Script inicial
+# Histórico:
+#       v2.0 2025-03-19, Marcos:
+#             - Script inicial v1.3 (2025-03-19)
 #             - Comentários
 #             - Comunicação com Discord
+#       v2.1 2025-03-24, Marcos:
+#             - Reorganização do script
 #
 # ---------------------------------------------------- #
 # Agradecimentos: FATEC
@@ -36,7 +39,8 @@ LOG_DIR="/var/log/nginx"  # Diretório onde os logs serão armazenados
 ONLINE_LOG="$LOG_DIR/online.log"  # Arquivo de log para status ONLINE
 OFFLINE_LOG="$LOG_DIR/offline.log"  # Arquivo de log para status OFFLINE
 TIMESTAMP=$(date +"%F %T")  # Timestamp para registro
-DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/Seu/Web/Hook"  # URL do webhook do Discord
+PAGE_URL="http://localhost" # URL da página a ser verificada
+DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/1351555076484890708/66yq2nC_1g1lVVVcpnYb3hbSIhIJ_NY_DjBM6vrPXOi6ZHEsv6JStHodTiU4nMSNNwK_"  # URL do webhook do Discord
 #
 # ---------------------------------------------------- #
 # -------------------- FUNCTIONS --------------------- #
@@ -50,13 +54,28 @@ log_message() {
     echo "$TIMESTAMP - $SERVICE_NAME - $status - $message" >> "$log_file"
 }
 
-# Função para enviar mensagens para o Discord ()
+# Função para enviar mensagens para o Discord
 send_discord() {
     local message=$1
     curl -H "Content-Type: application/json" -X POST -d "{\"content\": \"$message\"}" "$DISCORD_WEBHOOK_URL"
 }
 
-# Verificação de Portas e Conectividade
+# Função para verificar se a página está acessível
+check_page_status() {
+    local status_code=$(curl -o /dev/null -s -w "%{http_code}\n" "$PAGE_URL")
+
+    echo "Verificando se a página está acessível..."
+
+    if [ "$status_code" -eq 200 ]; then
+        log_message "online" "A página esta acessível." "$ONLINE_LOG"
+        send_discord "✅ **Página Status**: A página $PAGE_URL está ONLINE e respondendo corretamente."
+    else
+        log_message "offline" "A página NÃO está acessível." "$OFFLINE_LOG"
+        send_discord "❌ **Página Status**: A página $PAGE_URL está OFFLINE ou com problemas. Código de status: $status_code."
+    fi
+}
+
+# Função para verificar se o Nginx está escutando nas portas 80 e 443
 check_ports() {
     echo "Verificando se o Nginx está escutando nas portas 80 (HTTP) e 443 (HTTPS)..."
 
@@ -77,7 +96,7 @@ check_ports() {
     fi
 }
 
-# Verificação de Configuração de Virtual Hosts
+# Função para verificar a configuração de Virtual Hosts
 check_virtual_hosts() {
     echo "Verificando a configuração de Virtual Hosts (server blocks)..."
 
@@ -92,7 +111,41 @@ check_virtual_hosts() {
     fi
 }
 
+# Função para verificar o status do serviço Nginx
+check_service_status() {
+    SERVICE_STATUS=$(systemctl is-active "$SERVICE_NAME" 2>/dev/null)
 
+    if [ "$SERVICE_STATUS" == "active" ]; then
+        log_message "active" "O serviço $SERVICE_NAME está ONLINE." "$ONLINE_LOG"
+        send_discord "✅ **Nginx Status**: O serviço $SERVICE_NAME está ONLINE."
+    else
+        log_message "inactive" "O serviço $SERVICE_NAME está OFFLINE." "$OFFLINE_LOG"
+        send_discord "🚨 **Nginx Status**: O serviço $SERVICE_NAME está OFFLINE."
+
+        # Tentar reiniciar o serviço se estiver offline
+        echo "Tentando reiniciar o serviço $SERVICE_NAME..."
+        systemctl restart "$SERVICE_NAME"
+        if [ $? -eq 0 ]; then
+            log_message "active" "Serviço $SERVICE_NAME reiniciado com sucesso." "$ONLINE_LOG"
+            send_discord "🔄 **Nginx Status**: Serviço $SERVICE_NAME reiniciado com sucesso."
+        else
+            log_message "inactive" "Falha ao reiniciar o serviço $SERVICE_NAME." "$OFFLINE_LOG"
+            send_discord "⛔ **Nginx Status**: Falha ao reiniciar o serviço $SERVICE_NAME."
+        fi
+    fi
+}
+
+# Função para criar os arquivos de log
+create_logs() {
+    touch "$ONLINE_LOG" "$OFFLINE_LOG"
+    chown "$USER":"$USER" "$ONLINE_LOG" "$OFFLINE_LOG"
+
+    if [ ! -f "$ONLINE_LOG" ] || [ ! -f "$OFFLINE_LOG" ]; then
+        echo "Erro: Arquivos de log não foram criados corretamente."
+        send_discord "⛔ **Erro no Script**: Arquivos de log não foram criados corretamente."
+        exit 1
+    fi
+}
 #
 # ---------------------------------------------------- #
 # --------------------- CHECKS ----------------------- #
@@ -102,41 +155,14 @@ check_virtual_hosts() {
 # ---------------------------------------------------- #
 # ----------------------- CODE ----------------------- #
 #
-# Criar os arquivos de log
-touch {"$ONLINE_LOG","$OFFLINE_LOG"}
-chown "$USER":"$USER" "$ONLINE_LOG" "$OFFLINE_LOG"
+# Inicializa os arquivos de log
+initialize_logs
 
-# Verificar se os arquivos de log foram criados corretamente
-if [ ! -f "$ONLINE_LOG" ] || [ ! -f "$OFFLINE_LOG" ]; then
-    echo "Erro: Arquivos de log não foram criados corretamente."
-    send_discord "⛔ **Erro no Script**: Arquivos de log não foram criados corretamente."
-    exit 1
-fi
+# Verifica o status do serviço Nginx
+check_service_status
 
-# Verificar o status do serviço Nginx
-SERVICE_STATUS=$(systemctl is-active "$SERVICE_NAME" 2>/dev/null)
-
-# Registrar o status do serviço
-if [ "$SERVICE_STATUS" == "active" ]; then
-    log_message "active" "O serviço $SERVICE_NAME está ONLINE." "$ONLINE_LOG"
-    send_discord "✅ **Nginx Status**: O serviço $SERVICE_NAME está ONLINE."
-else
-    log_message "inactive" "O serviço $SERVICE_NAME está OFFLINE." "$OFFLINE_LOG"
-    send_discord "🚨 **Nginx Status**: O serviço $SERVICE_NAME está OFFLINE."
-
-    # Tentar reiniciar o serviço se estiver offline
-    echo "Tentando reiniciar o serviço $SERVICE_NAME..."
-    systemctl restart "$SERVICE_NAME"
-    if [ $? -eq 0 ]; then
-        log_message "active" "Serviço $SERVICE_NAME reiniciado com sucesso." "$ONLINE_LOG"
-        send_discord "🔄 **Nginx Status**: Serviço $SERVICE_NAME reiniciado com sucesso."
-    else
-        log_message "inactive" "Falha ao reiniciar o serviço $SERVICE_NAME." "$OFFLINE_LOG"
-        send_discord "⛔ **Nginx Status**: Falha ao reiniciar o serviço $SERVICE_NAME."
-    fi
-fi
-
-# Executar as verificações adicionais
+# Executa as verificações adicionais
+check_page_status
 check_ports
 check_virtual_hosts
 
