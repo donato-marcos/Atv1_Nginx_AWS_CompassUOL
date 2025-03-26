@@ -89,15 +89,15 @@ sudo mkdir -p /var/www/site2.com/html
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SITE 1</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <h1>Bem Vindo ao Site 1</h1>
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>SITE 1</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <h1>Bem Vindo ao Site 1</h1>
+    </body>
 </html>
 ```
 
@@ -105,15 +105,15 @@ sudo mkdir -p /var/www/site2.com/html
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SITE 2</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <h1>Bem Vindo ao Site 2</h1>
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>SITE 2</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <h1>Bem Vindo ao Site 2</h1>
+    </body>
 </html>
 ```
 
