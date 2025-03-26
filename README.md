@@ -227,3 +227,16 @@ SE o export PATH já estiver sendo usado no shell script não será necessário 
    ![image](https://github.com/user-attachments/assets/a6d46328-4ac0-4b1b-a1dd-1d1729674263)
 
 ---
+
+# README - Configuração automatizada para Nginx Server (BONUS)
+
+## Visão Geral
+
+Este projeto Ansible automatiza a implantação e configuração de servidores Nginx, incluindo:
+- Instalação e configuração do Nginx
+- Implantação de sites estáticos
+- Configuração de firewall e SELinux
+- Monitoramento via scripts
+- Configuração de cron jobs
+
+  [README do Bonus](https://github.com/donato-marcos/Atv1_Nginx_AWS_CompassUOL/blob/main/nginx-server_rocky_amazon-linux/README.md)
