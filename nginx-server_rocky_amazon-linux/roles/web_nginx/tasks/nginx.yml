@@ -1,0 +1,47 @@
+---
+- name: Instalar NGINX
+  ansible.builtin.dnf:
+    name: nginx
+    state: present
+
+- name: Criar diretórios para os sites
+  ansible.builtin.file:
+    path: "{{ item.web_dir }}"
+    state: directory
+    owner: nginx
+    group: nginx
+    mode: '0755'
+  loop: "{{ sites }}"
+
+- name: Copiar arquivos estáticos para os sites
+  ansible.builtin.copy:
+    src: "files/{{ item.name }}/"
+    dest: "{{ item.web_dir }}/"
+    owner: nginx
+    group: nginx
+    mode: '0644'
+  loop: "{{ sites }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Configurar NGINX para cada site
+  ansible.builtin.template:
+    src: "site.conf.j2"
+    dest: "/etc/nginx/conf.d/{{ item.web_site }}.conf"
+    owner: root
+    group: root
+    mode: '0644'
+  loop: "{{ sites }}"
+  loop_control:
+    label: "{{ item.name }}"
+  notify: Restart NGINX
+
+- name: Testar configuração do NGINX
+  ansible.builtin.command: nginx -t
+  changed_when: false
+
+- name: Iniciar e habilitar serviço NGINX
+  ansible.builtin.systemd_service:
+    name: nginx.service
+    enabled: yes
+    state: started

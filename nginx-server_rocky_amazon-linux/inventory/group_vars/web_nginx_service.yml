@@ -1,0 +1,17 @@
+---
+nginx_version: 1.20.1
+
+sites:
+  - name: site1
+    web_site: site1.aesthar.com.br
+    web_dir: /var/www/site1.com/html
+  - name: site2
+    web_site: site2.aesthar.com.br
+    web_dir: /var/www/site2.com/html
+  - name: atv1_web
+    web_site: atv1.aesthar.com.br
+    web_dir: /var/www/atv1.aesthar.com.br/html
+
+firewall_services:
+  - http
+  - https

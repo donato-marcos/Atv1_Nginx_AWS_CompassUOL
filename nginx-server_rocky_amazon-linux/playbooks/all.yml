@@ -1,0 +1,6 @@
+---
+- hosts: web_nginx_service
+  become: yes
+  roles:
+    - common
+    - web_nginx

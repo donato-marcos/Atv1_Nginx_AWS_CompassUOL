@@ -1,0 +1,3 @@
+server_name: nginx03
+domain_name: aesthar.com.br
+dns_ip: "{{ ansible_default_ipv4.address }}"

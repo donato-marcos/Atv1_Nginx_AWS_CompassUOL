@@ -1,0 +1,28 @@
+---
+- name: Atualizar o cache do dnf
+  ansible.builtin.dnf:
+    update_cache: yes
+    name: "*"
+    state: latest
+
+- name: Instalar pacotes básicos
+  ansible.builtin.dnf:
+    name:
+      - vim
+      - tmux
+#      - qemu-guest-agent
+    state: present
+
+- name: Configurar timezone {{ timezone }}
+  community.general.timezone:
+    name: "{{ timezone }}"
+
+- name: Remover pacotes desnecessários
+  ansible.builtin.dnf:
+    autoremove: yes
+
+#- name: Iniciar o serviço QEMU-AGENT
+#  ansible.builtin.systemd_service:
+#    name: qemu-guest-agent.service
+#    state: started
+#    enabled: yes 

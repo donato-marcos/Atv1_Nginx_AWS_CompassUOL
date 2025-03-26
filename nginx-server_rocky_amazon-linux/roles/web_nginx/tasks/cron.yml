@@ -1,0 +1,28 @@
+---
+- name: Instalar cronie
+  ansible.builtin.dnf:
+    name: cronie
+    state: present
+
+- name: Garantir que o serviço crond está em execução
+  ansible.builtin.systemd_service:
+    name: crond.service
+    enabled: yes
+    state: started
+
+- name: Copiar script de monitoramento
+  ansible.builtin.copy:
+    src: files/monitoramento_v2.1.sh
+    dest: /usr/local/bin/monitoramento_v2.1.sh
+    mode: '0755'
+
+- name: Adicionar cron job para o script de monitoramento
+  ansible.builtin.cron:
+    name: "Monitoramento"
+    minute: "*"
+    hour: "*"
+    day: "*"
+    month: "*"
+    weekday: "*"
+    user: root
+    job: "/usr/local/bin/monitoramento_v2.1.sh >> /var/log/monitoramento.log 2>&1"

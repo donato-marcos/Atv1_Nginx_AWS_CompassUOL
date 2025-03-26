@@ -1,0 +1,14 @@
+---
+- name: Configurar o hostname
+  ansible.builtin.hostname:
+    name: "{{ server_name }}.{{ domain_name }}"
+
+- name: Configurar o arquivo /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: "{{ dns_ip }} {{ server_name }}.{{ domain_name }} {{ server_name }}"
+
+- include_tasks: nginx.yml
+- include_tasks: firewall.yml
+- include_tasks: selinux.yml
+- include_tasks: cron.yml

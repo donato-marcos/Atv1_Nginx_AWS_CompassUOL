@@ -1,0 +1,16 @@
+- name: Verificar status do SELinux
+  ansible.builtin.debug:
+    msg: "Status do SELinux: {{ ansible_selinux.status }}"
+  changed_when: false
+
+- name: Ajustar contextos SELinux para os diretórios dos sites
+  ansible.builtin.command: restorecon -Rv {{ item.web_dir }}
+  loop: "{{ sites }}"
+  notify: Restart NGINX
+  when: ansible_selinux.status == "enabled"
+
+- name: Permitir NGINX a se conectar à rede (SELinux)
+  ansible.builtin.command: setsebool -P httpd_can_network_connect on
+  when: ansible_selinux.status == "enabled"
+
+

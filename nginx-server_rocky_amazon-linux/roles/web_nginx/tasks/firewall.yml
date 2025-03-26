@@ -1,0 +1,10 @@
+- name: Configurar firewall (apenas para Rocky Linux)
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    permanent: true
+    immediate: true
+    state: enabled
+  with_items: "{{ firewall_services }}"
+  when: ansible_distribution == "Rocky"
+  notify: Restart NGINX
+
