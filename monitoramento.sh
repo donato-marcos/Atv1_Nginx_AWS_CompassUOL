@@ -4,7 +4,7 @@ export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 #
 # ---------------------------------------------------- #
 # Nome do Script: monitoramento.sh
-# Descrição: descrição do script
+# Descrição: script para monitorar servidor web nginx
 # Site:
 # Escrito por: Marcos Donato
 # Manutenção: Marcos Donato
