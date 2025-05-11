@@ -1,3 +1,4 @@
+---
 - name: Configurar firewall (apenas para Rocky Linux)
   ansible.posix.firewalld:
     service: "{{ item }}"
